@@ -1,15 +1,18 @@
-#include <Arduino.h>
-#include <Wire.h>               // this is necessary to deal with the pins and wires
-#include <vector>
-//#include <LittleFS.h>
-//#include <GEM_u8g2.h>           // library of code to create menu objects on the B&W display
+#include "src/includes.h"
+
 #include "src/config.h"
 #include "src/io.h"
 #include "src/synth.h"
 
+#include <Wire.h>               // this is necessary to deal with the pins and wires
+//#include <LittleFS.h>
+//#include <GEM_u8g2.h>           // library of code to create menu objects on the B&W display
+
+
+
 //U8G2_SH1107_SEEED_128X128_F_HW_I2C u8g2(U8G2_R2, U8X8_PIN_NONE);
 //File settingsFile;
-std::vector<uint8_t> hex;
+byte_vec hex;
 
 void setup() {
   #if (defined(ARDUINO_ARCH_MBED) && defined(ARDUINO_ARCH_RP2040))
@@ -42,9 +45,8 @@ void setup() {
   //u8g2.sendBuffer();
   //settingsFile.printf("testing 123");
   //settingsFile.close
-  pinGrid.setup(muxPins, colPins, mapGridToPixel); 
-  rotary.setup(rotaryPinA, rotaryPinB, rotaryPinC);
-  setupTimersCore0();
+  synth.setup(sample_rate_in_Hz);
+
   hex.resize(colPins.size() << muxPins.size());
 }
 
@@ -62,15 +64,7 @@ void loop() {
   if (x) {
     synth.tryNoteOff(c);
   }
-}
 
-void setup1() {
-  audioOut.setup(pwmPins, adcPins, emptyPinForCycleCounting);
-  synth.setup();
-  setupTimersCore1();
-}
-
-void loop1() {
   uint v = synth.count_voices_playing();
   uint f = audioOut.free_bytes();
   Serial.print("v");
@@ -83,4 +77,15 @@ void loop1() {
       audioOut.buffer(synth.writeNextSample());
     }
   }
+
+}
+
+void setup1() {
+  pinGrid.setup(muxPins, colPins, mapGridToPixel); 
+  rotary.setup(rotaryPinA, rotaryPinB, rotaryPinC);
+  audioOut.setup(pwmPins, adcPins);
+	start_processing_background_IO_tasks();
+}
+
+void loop1() {
 }
