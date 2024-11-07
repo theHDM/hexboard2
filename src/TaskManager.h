@@ -55,50 +55,6 @@ class task_mgr_obj {
         }
 };
 
-class A {
-    private:
-        int repeat_uS = 1;
-    public:
-        void set_repeat(int arg_uS) {
-            repeat_uS = arg_uS;
-        }
-        int get_repeat() {
-            return repeat_uS;
-        }
-        void doWork() {
-            std::cout << " A:synth. ";
-        }
-};
-class B {
-    private:
-        int repeat_uS = 1;
-    public:
-        void set_repeat(int arg_uS) {
-            repeat_uS = arg_uS;
-        }
-        int get_repeat() {
-            return repeat_uS;
-        }
-        void doWork() {
-            std::cout << " B:rotary. ";
-        }
-};
-class C {
-    private:
-        int repeat_uS = 1;
-    public:
-        void set_repeat(int arg_uS) {
-            repeat_uS = arg_uS;
-        }
-        int get_repeat() {
-            return repeat_uS;
-        }
-        void doWork() {
-            std::cout << " C:hexes. ";
-        }
-};
-
-
 task_mgr_obj task_mgr(8);
 
 static bool on_irq() {
@@ -116,25 +72,64 @@ static bool on_irq() {
     return false;
 }
 
+// pretend these are three different hardware drivers
+class A {
+    private:
+        int repeat_uS = 32;
+    public:
+        int get_repeat() {
+            return repeat_uS;
+        }
+        void doWork() {
+            std::cout << " A:synth. ";
+        }
+};
+class B {
+    private:
+        int repeat_uS = 256;
+    public:
+        int get_repeat() {
+            return repeat_uS;
+        }
+        void doWork() {
+            std::cout << " B:rotary. ";
+        }
+};
+class C {
+    private:
+        int repeat_uS = 16;
+    public:
+        int get_repeat() {
+            return repeat_uS;
+        }
+        void doWork() {
+            std::cout << " C:hexes. ";
+        }
+};
+A routine_A;
+B routine_B;
+C routine_C;
+// 
+// in Arduino environment, use this to start the background timer:
+// #include "pico/stdlib.h"
+// #include "pico/time.h"
+// const uint frequency_poll    =    16;
+// const uint rotary_rate_in_uS =   512;
+// constexpr uint audio_sample_in_uS = 2 * frequency_poll;
+// constexpr uint audio_sample_rate = 1'000'000 / audio_sample_in_uS;
+// struct repeating_timer io_timer;
+
+void setup_tasks() {
+    task_mgr.add_task(routine_A.get_repeat(), std::bind(&A::doWork, &routine_A));
+    task_mgr.add_task(routine_B.get_repeat(), std::bind(&B::doWork, &routine_B));
+    task_mgr.add_task(routine_C.get_repeat(), std::bind(&C::doWork, &routine_C));
+//   add_repeating_timer_us(frequency_poll, on_irq, NULL, &io_timer);
+}
+
+// in Arduino environment, run in setup1()
 int main() {
-    A routine_A;
-    routine_A.set_repeat(32);
-    task_mgr.add_task(
-        routine_A.get_repeat(), 
-        std::bind(&A::doWork, &routine_A)
-    );
-    B routine_B;
-    routine_B.set_repeat(256);
-    task_mgr.add_task(
-        routine_B.get_repeat(), 
-        std::bind(&B::doWork, &routine_B)
-    );
-    C routine_C;
-    routine_C.set_repeat(16);
-    task_mgr.add_task(
-        routine_C.get_repeat(), 
-        std::bind(&C::doWork, &routine_C)
-    );
+    setup_tasks();
+    // for testing in a c++ environment, pretend this loop runs every few microseconds
     int i = 0;
     for (int j = 0; j < 72; j++) {
         if (on_irq()) {
