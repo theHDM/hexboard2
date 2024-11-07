@@ -99,8 +99,10 @@ for (int i = 0; i < scale.get_scale_length(); i++ ){
 ifstream test_kbm;
 test_kbm.open("kbm/12-tet.kbm");
 scala::kbm loaded_kbm = scala::read_kbm(test_kbm);
+TO SOLVE:
+how do we work with ifstream / iostream?
+or can we modify the function to use a different method?
 */
-
 
 class musicalLayout {
   generator select_the_generator_this_is_based_on
