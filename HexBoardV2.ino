@@ -1,6 +1,7 @@
 #include "src/includes.h"
-
 #include "src/config.h"
+#include "src/TaskManager.h"
+
 #include "src/io.h"
 #include "src/synth.h"
 
@@ -81,10 +82,15 @@ void loop() {
 }
 
 void setup1() {
-  pinGrid.setup(muxPins, colPins, mapGridToPixel); 
-  rotary.setup(rotaryPinA, rotaryPinB, rotaryPinC);
   audioOut.setup(pwmPins, adcPins);
-	start_processing_background_IO_tasks();
+	task_mgr.add_task(2 * frequency_poll,std::bind(&audioOut_obj::send, &audioOut));
+
+	rotary.setup(rotaryPinA, rotaryPinB, rotaryPinC);
+	task_mgr.add_task(rotary_rate_in_uS,std::bind(&rotary_obj::poll, &rotary));
+  
+	pinGrid.setup(muxPins, colPins, mapGridToPixel); 
+	task_mgr.add_task(rotary_rate_in_uS,std::bind(&pinGrid_obj::poll, &pinGrid));
+	
 }
 
 void loop1() {
