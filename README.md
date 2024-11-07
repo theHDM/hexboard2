@@ -1,6 +1,6 @@
 Notes from my phone as of Nov 7 2024
 
-
+```
 constexpr uint sample_rate = 500'000 / freq_poll
 
 designate core 2 as the background operation core
@@ -150,4 +150,4 @@ load it into this app
 designate your base color palette and your layout steps
 preview it in terpstra
 export it to a CPP header
-u
+```
