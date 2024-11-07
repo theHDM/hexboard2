@@ -1,5 +1,5 @@
 README
-
+```
 this library drives three hardware features on the HexBoard
 in order of priority:
  1) output audio to the piezo buzzer and audio jack
@@ -52,3 +52,4 @@ empirically, each of the four steps in the knob sequence
 (off/off -> on/off -> on/on -> off/on -> off/off)
 takes 500 - 800 uS, so as long as the rotary sequence
 occurs at least this often, it should not miss any spins.
+```
