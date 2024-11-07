@@ -1,18 +1,18 @@
 Notes from my phone as of Nov 7 2024
 
 ```
-constexpr uint sample_rate = 500'000 / freq_poll
-
+DONE:
 designate core 2 as the background operation core
 
-KEYBOARD.h
+DONE: KEYBOARD.h
 create one global object, takes in the grid of input pins, outputs an array of read statuses
+can change whether to loop by mux or by col
 mutex = 0 during read phase, 1 during write phase
-overload read() to be digital or analog read -> update mux/col
+digital or analog read -> update mux/col
 pre-map the pins to an output order
 you shouldn't need to reverse the map
 
-ROTARY.h
+BASICALLY DONE: ROTARY.h
 create one object -- 3 pins, 2 outputs
 MUTEX = 0 when running the update function, 1 otherwise
 overload read() to pop a turn or click from the queue
