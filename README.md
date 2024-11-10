@@ -12,16 +12,16 @@ digital or analog read -> update mux/col
 pre-map the pins to an output order
 you shouldn't need to reverse the map
 
-BASICALLY DONE: ROTARY.h
+DONE: ROTARY.h
 create one object -- 3 pins, 2 outputs
 MUTEX = 0 when running the update function, 1 otherwise
 overload read() to pop a turn or click from the queue
 
-AUDIO.h
+DONE AUDIO.h
 create one object per audio source, with multiple pin outs
 use circle bugger and mutex pointers when needed
 
-PIXEL.h
+DONE but has to be on core 1 PIXEL.h
 poll() to send pixel data each frame (60fps, or 16384uS per frame)
 do all color coversions before polling -- should only send the buffer.
 
