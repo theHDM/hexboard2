@@ -13,6 +13,43 @@ enum {
   instruction_count
 };
 
+struct hex_t { //      -r
+	int q;       //  -q <- \ -> +q
+	int r;       //         +r
+	hex_t(int q=0, int r=0)
+		: q(q), r(r) {}
+	hex_t& operator=(const hex_t& rhs) {
+		q = rhs.q;
+		r = rhs.r;
+		return *this;
+	}
+	bool operator==(const hex_t& rhs) const {
+		return (q == rhs.q && r == rhs.r);
+	}
+	hex_t operator+(const hex_t& rhs) const {
+		return hex_t(q + rhs.q, r + rhs.r);
+	}
+	hex_t operator*(const int& rhs) const {
+		return hex_t(rhs * q, rhs * r);
+	}
+}
+
+enum {
+	dir_east = 0,
+	dir_ne = 1,
+	dir_nw = 2,
+	dir_west = 3,
+	dir_sw = 4,
+	dir_se = 5
+};
+
+hex_t unitHex[] = {
+	{+1, 0},{+1,-1},{0,-1},{-1, 0},{-1,+1},{0,+1}
+};
+
+
+
+
 struct instruction_t {
   int instruction_code;
   int parameter;
@@ -28,9 +65,19 @@ struct instruction_set_t {
 };
 
 struct hex_button_t {
-  int current_pressure;  // -1 means off. 0..127 means on and send key pressure
-  int prior_pressure;
-  instruction_set_t on_key;
+	hexagon_coord_t coordinates;
+	int pixel;
+	int current_pressure;  
+	//     -1 means off
+	// 0..127 means on and send key pressure
+	int prior_pressure;
+	instruction_set_t on_key;
+
+
+  void update(int p) {
+    prior_pressure = current_pressure;
+    current_pressure = p;
+  }
   instruction_t get_instructions() {
     if (current_pressure > prior_pressure) {
       if (prior_pressure == -1) {
@@ -61,10 +108,6 @@ struct keyboard_obj {
   int pressure_max_threshold;
   int_matrix map_to_array;
   vector<hex_button_t> hex;
-  void update_hex(hex_button_t& h, int p) {
-    h.prior_pressure = h.current_pressure;
-    h.current_pressure = p;
-  }
   int key_state_to_pressure(int state_value) {
     if (state_value < key_on_threshold) {
       return -1;
@@ -92,8 +135,7 @@ struct keyboard_obj {
     state_matrix = read_new_state;
     for (int i = 0; i < sizeA; ++i) {
       for (int j = 0; j < sizeB; ++j) {
-        update_hex(
-          hex[map_to_array[i][j]], 
+				hex[map_to_array[i][j]].update(
           key_state_to_pressure(state_matrix[i][j])
         );
       }
