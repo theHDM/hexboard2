@@ -1,6 +1,5 @@
 Notes from my phone as of Nov 7 2024
 
-```
 DONE:
 designate core 2 as the background operation core
 
@@ -19,23 +18,25 @@ overload read() to pop a turn or click from the queue
 
 DONE AUDIO.h
 create one object per audio source, with multiple pin outs
-use circle bugger and mutex pointers when needed
+use circle buffer and mutex pointers when needed
 
 DONE but has to be on core 1 PIXEL.h
 poll() to send pixel data each frame (60fps, or 16384uS per frame)
 do all color coversions before polling -- should only send the buffer.
 
 consider running the OLED / menu on core 1 because it's blocky.
-
+```
 struct hex_coordinate {int q, int r, int s};
 make an ordered map of pixel ID to coordinate and back
 can look up "coordinates of pixel" or "pixel at this coordinate"
-
+```
+```
 struct instruction {
   enum {note on, note off, control change, program change, palette swap, preset swap, etc.}
   int some sort of parameter
 }
-
+```
+```
 class oneSingleHex {
   friend keyboard_obj (allow inheritance)
   current pressure value {0 .. 127}
@@ -48,7 +49,8 @@ class oneSingleHex {
       key_stays_on_pressure_decrease      2+ >  1+
       key_turns_off                       1+ >  0
 }
-
+```
+```
 struct noteValue {
   float MIDInoteValueWithMicrotones [0.0 .. 128.0>
   pair of int convertToPlainMIDINotePlusPitchBend(int pitchBendRange)
@@ -56,9 +58,11 @@ struct noteValue {
   (i.e. convert 69.25 (48 semitones) = 69 + 43)
   float associatedFrequencyForSynth {2^MIDI-69 * 440}
 }
-  
+```
+```  
 struct noteToHexagonPairOrMap {noteValue N, hex_coordinate H}
-
+```
+```
 class generator {
   textStream KBMdata -- this will give the info needed to:
     -- set scale lock true/falses
@@ -80,8 +84,9 @@ class generator {
     used if user selects "color by number" instead of "color by tuning" or "rainbow"
   lattice maker function to calculate the layout
 }
-/*
+```
 https://github.com/MarkCWirt/libscala-file
+```
 #include "scala_file.hpp"
 // Get an open file pointer
 ifstream test_scale;
@@ -99,16 +104,17 @@ for (int i = 0; i < scale.get_scale_length(); i++ ){
 ifstream test_kbm;
 test_kbm.open("kbm/12-tet.kbm");
 scala::kbm loaded_kbm = scala::read_kbm(test_kbm);
+```
 TO SOLVE:
 how do we work with ifstream / iostream?
 or can we modify the function to use a different method?
-*/
-
+```
 class musicalLayout {
   generator select_the_generator_this_is_based_on
   std::vector<noteToHexagonPair> list of manual overrides
 }
-
+```
+```
 class keyboard_obj {
   make a key sensitivity map / function
   i.e. LERP along some set of thresholds based on hall effect sensor testing:
@@ -119,7 +125,8 @@ class keyboard_obj {
   void update() -- convert key states into pressure values and pass to each hex button object
   std::vector<oneSingleHex> of 160 hexagon states
 }
-  
+```
+```
 class gradient {
   this will be a method to store or generate gradients.
   three generators:
@@ -127,7 +134,8 @@ class gradient {
   shade_tint(HSV base)      gradient(pair of HSV and point on line)
   rainbow(constant SV, constant SL, etc.)
 }
-
+```
+```
 class reactiveColoring {
   instructions to lookup along a gradient based on parameter
   i.e.
@@ -135,12 +143,13 @@ class reactiveColoring {
   reactToValue(&value, map low, map high)
   passiveCycle(speed)
 }
-
+```
+```
 struct pixelDefinition {
   gradient,
   colorRule
 }
-
+```
 SETTINGS
 use littleFS to store menu-related options and active layout (i.e. 1 thru 10)
 use C++ headers to let the user assign layouts to preset numbers i.e. 1 thru 10
