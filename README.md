@@ -60,7 +60,12 @@ class oneSingleHex {
       key_turns_off                       1+ >  0
 }
 ```
-
+store notes as floating midi value
+realize midi based on user input:
+NONE = round off notes -- full midi range, but no microtones
+MPE = use MPE per-channel bend -- full microtonal, but only 1 instrument
+KBM = use the KBM data in your layout file to make a tuning table -- "traditional method" but not for beginners
+MIDI 2.0 = need to research how to implement -- full midi and microtones, but limited support
 ```
 struct noteValue {
   float MIDInoteValueWithMicrotones [0.0 .. 128.0>
@@ -171,8 +176,9 @@ struct pixelDefinition {
 }
 ```
 SETTINGS
-use littleFS to store menu-related options and active layout (i.e. 1 thru 10)
-use C++ headers to let the user assign layouts to preset numbers i.e. 1 thru 10
+use littleFS to store menu-related options, and the map number of the active layout (any int)
+we know that littleFS works, just have to decide how to store it. as individual bytes on a map? or as text and then parse?
+might start with indiv bytes then progress to parsing.
 
 IDEAS FOR OFFLINE WEB APPS
 something to connect sevish scale workshop and terpstra
