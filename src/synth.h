@@ -96,7 +96,7 @@ private:
       refToShape = generator_saw;
       if (_freq < transition_saw_low) {
         // 127 = square, 0 = saw
-        refToMod = lerp(0,127,transition_square,transition_saw_low,_freq);
+        refToMod = linterp(0,127,transition_square,transition_saw_low,_freq);
       } else {
         refToMod = 0;
       }
@@ -104,7 +104,7 @@ private:
       refToShape = generator_triangle;
       if (_freq < transition_saw_low) {
         // 127 = saw, 0 = triangle
-        refToMod = lerp(0,127,transition_saw_high,transition_triangle,_freq);
+        refToMod = linterp(0,127,transition_saw_high,transition_triangle,_freq);
       } else {
         refToMod = 0;
       }
@@ -135,7 +135,7 @@ private:
         _stored_wave_form[i] = 0;
       }
       for (int i = mod; i < (128 + mod); i++) {
-        _stored_wave_form[i] = lerp(0,255,mod,128+mod,i);
+        _stored_wave_form[i] = linterp(0,255,mod,128+mod,i);
       }
       for (int i = (128 + mod); i < 256; i++) {
         _stored_wave_form[i] = 255;
@@ -144,10 +144,10 @@ private:
     case generator_triangle: // the mod wheel moves the apex of the wave
 	    // i.e. more mod makes the triangle more "sawtooth-like"
       for (int i = 0; i < (128 + mod); i++) {
-        _stored_wave_form[i] = lerp(0,255,0,128+mod,i);
+        _stored_wave_form[i] = linterp(0,255,0,128+mod,i);
       }
       for (int i = (128 + mod); i < 256; i++) {
-        _stored_wave_form[i] = lerp(0,255,256,128+mod,i);
+        _stored_wave_form[i] = linterp(0,255,256,128+mod,i);
       }
       break;
     default: // otherwise grab the existing wavetable
@@ -249,13 +249,13 @@ public:
       if (_smp >= (_instrument.attack + _instrument.decay)) {
         envelope = _instrument.sustain;
       } else if (_smp < _instrument.attack) {
-        envelope = lerp((int)1,(int)255,0,_instrument.attack,_smp);          
+        envelope = linterp((int)1,(int)255,0,_instrument.attack,_smp);          
       } else {
         envelope = lerp((int)255,_instrument.sustain,0,_instrument.decay,_smp-_instrument.attack);
       }
     } else if (_smp < _instrument.release) {
       // apply release
-      envelope = lerp(_instrument.sustain,(int)0,0,_instrument.release,_smp);        
+      envelope = linterp(_instrument.sustain,(int)0,0,_instrument.release,_smp);        
     }
     if (!(envelope)) {
       // if past the release length
