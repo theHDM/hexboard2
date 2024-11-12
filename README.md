@@ -10,6 +10,11 @@ mutex = 0 during read phase, 1 during write phase
 digital or analog read -> update mux/col
 pre-map the pins to an output order
 you shouldn't need to reverse the map
+digital: 1 is btn up 0 is btn down
+analog: 1023 to 480 is brn up
+480 to 280 is btn partial down
+280 to 0 is btn full down
+
 
 DONE: ROTARY.h
 create one object -- 3 pins, 2 outputs
@@ -173,4 +178,39 @@ load it into this app
 designate your base color palette and your layout steps
 preview it in terpstra
 export it to a CPP header
+
+PRESETS FORMAT?
+some sort of header structure that is easy for a person to read
+if a generator is being used,
+need to specify an enum to indicate that the object is populated via generator. e.g.
 ```
+enum {
+  generate_equal = 123;
+  generate_mos = 124;
+  generate_blank = 0;
+}
+
+layout_t myLayout = {
+  generate_equal, // rule
+  {12, 100},      // store a vector of params
+  {
+   {overrides...}
+  }
+}
+enum {
+  generate_shade_from_HSV = 0,
+  generate_shade_from_RGB = 1, ...
+  generate_rainbow_from_SL = 101,
+  generate_rainbow_from_SV...
+  etc
+}
+gradient_t keyRed = {
+  generate_shade_from_HSV,
+  {180, 255, 255} // make a function or namespace that will convert this to a color type
+}
+gradient_t rainbow = {
+  generate_rainbow_from_SV,
+  {1.0, 1.0}
+}
+```
+questions: can we partially init the object via constant declaration? i.e. struct has 4 member variables but we declare 1 and 2 from outset
