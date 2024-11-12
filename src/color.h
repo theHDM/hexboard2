@@ -1,81 +1,59 @@
 #pragma once
 #include "syntacticSugar.h"
+#include "convertColors.h"
 
 
-
-
-
-// send this to syntactic sugar!
-
-struct lerp_point {
-	int value;
-	float loc;
-}
-using lerp_vec = std::vector<lerp_point>;
-int lerp_by_loc(lerp_vec lerp_points, float loc) {
-	// LERP over this line
-}
-float lerp_by_value(lerp_vec lerp_points, int value) {
-	// LERP over this line
-}
-
-// -------------
-struct RGB {
-	int R;
-	int G;
-	int B;
-}
-
-struct HSV {
-	int H;
-	int S;
-	int V;
-}
-
-struct color {
-	int red;
-	int green;
-	int blue;
-	
-}
-
-
-
-
-
-
-
-struct color_table_t {
-	std::vector<colorCode /*in adafruit format*/> table;
+struct gradient_t {
+	size_t number_of_steps; // even steps of 0 thru 1 inclusive
+	// colorCode is the neoPixel integer format
+	std::map<float, colorCode> color_code_map;
 	colorCode lookup(float loc) {
-		size_t index = /* lerp over size */ ;
-		return table[index];
+		return color_code_table.lower_bound(loc);
 	}
+	
 	void generate_rainbow(int const_sat, int const_val) {
-		// TBD
-		// table[i] = strip.gamma32(ColorHSV(HSV));
+		// generate a rainbow of hues
+		// direct calculation; no interpolation needed
+		//
+		// table[i] = color.as_neoPixel();
 	}
-	void generate_gradient(lerp_vec gradient_points) {
-		// TBD
-		// table[i] = strip.gamma32(ColorHSV(HSV));
+	// use the rgb/hsv color type, not the colorCode
+	color_t lerp(color_t colorOne, color_t colorTwo,
+		float yOne, float yTwo, float y) {
+		// get colors as OKLCH
+		// perceptual blend formula
+		// return appropriate color_t
 	}
+	void generate_gradient(std::map<float, color_t> gradient_map) {
+		// interpolate gradient colors and convert
+		// to neopixel format ahead of time
+		// overloaded lerp to blend colors perceptually
+		// then you can do
+		for (float i = 0; i < 1; i += 1/(number_of_steps - 1)) {
+			color_code_map[i] = lerp_over_map(gradient_map, i).as_neoPixel;
+		}
+	}
+	// use the rgb/hsv color type, not the colorCode
 	void generate_shades_of(/* HSV base_color*/) {
 		// TBD
-		lerp_vec temp;
-		temp.emplace_back(/* black */, 0);
-		temp.emplace_back(base_color, 0.5);
-		temp.emplace_back(/* white */, 1);
-		generate_gradient(temp);
+		std::map<float, color_t> shade;
+		shade[0] = /* black */;
+		shade[0.5] = base_color;
+		shade[1] = /* white */;
+		generate_gradient(shade);
 	}
 }
 
 struct reactive_coloring_t {
-	color_table_t gradient;        //color lookup table
+	gradient_t gradient;        //color lookup table
 	int* ptr_to_reactive_value; //i.e. timer, key pressure, wheel
-	lerp_vec rule_table;        //choose color index based on value
+	std::map<int,float> rule_table; // e.g. -1 = 0.0  0 = 0.5  127 = 1.00
 	colorCode get_color() {
-		return gradient.lookup(lerp_by_value(
-			rule_table, *ptr_to_reactive_value
-		));
+		return gradient.lookup(
+			lerp_over_map(
+				rule_table, *ptr_to_reactive_value
+			)
+		);
 	}
+	
 }
