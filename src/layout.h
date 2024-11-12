@@ -90,13 +90,16 @@ struct keyboard_obj {
 	std::map<int,int> pixel_to_index; // some-to-one map
 	std::map<int,int> index_to_pixel; // on setup, flip to invert
 	std::map<int,hex_t> index_to_coord; // map is not reversible
+	int_matrix read_state; 
+	int_matrix read_time;
 
   void setup(int cols, int rows, 
 						std::map<int,int> given_map_pixel_to_index,
 						std::map<int,hex_t> given_map_index_to_coord) {
     sizeA = cols;
     sizeB = rows;
-    resize_matrix(state_matrix, cols, rows);
+    resize_matrix(read_state, cols, rows);
+    resize_matrix(read_time, cols, rows);
     hex.resize(cols * rows);
 		index_to_coord = given_map_index_to_coord;
 		pixel_to_index = given_map_pixel_to_index;
@@ -142,7 +145,7 @@ struct keyboard_obj {
       fill(c.begin(),c.end(),-1);
     }
   }
-  void update(int_matrix read_new_state, int_matrix read_time) {
+  void update() {
     for (int i = 0; i < sizeA; ++i) {
       for (int j = 0; j < sizeB; ++j) {
 				hex[map_to_array[i][j]].update(
@@ -151,4 +154,24 @@ struct keyboard_obj {
       }
     }
   }
+	//  EXAMPLE:
+	//
+	//  GLOBAL
+	//  keyboard_obj hexBoard;
+	//  ...
+	//  loop()...
+	//
+	//  if (pinGrid.readTo(hexBoard.read_state, hexBoard.read_time)) {
+	//    hexBoard.update();
+	//    for (auto& h : hexBoard.hex) {
+	//			instruction_t cmd = h.get_instructions();
+	//			if (cmd.do == command::send_note_on) {
+	//				// tryNoteOn(h);
+	//			}
+	//			if (cmd.do == do_note_off) {
+	//				// tryNoteOff(h);
+	//			}
+	//      // etc.etc.
+	//		}
+	// }
 };
