@@ -47,9 +47,6 @@ hex_t unitHex[] = {
 	{+1, 0},{+1,-1},{0,-1},{-1, 0},{-1,+1},{0,+1}
 };
 
-
-
-
 struct instruction_t {
   int instruction_code;
   int parameter;
@@ -67,12 +64,12 @@ struct instruction_set_t {
 struct hex_button_t {
 	hexagon_coord_t coordinates;
 	int pixel;
+	
 	int current_pressure;  
 	//     -1 means off
 	// 0..127 means on and send key pressure
 	int prior_pressure;
 	instruction_set_t on_key;
-
 
   void update(int p) {
     prior_pressure = current_pressure;
@@ -94,7 +91,7 @@ struct hex_button_t {
     } else if (current_pressure == -1) {
       return on_key.stays_off;
     } else {
-      return on_key_stays_on_pressure_equal;
+      return on_key.stays_on_pressure_equal;
     }
   }
 };
@@ -106,8 +103,10 @@ struct keyboard_obj {
   int key_on_threshold;
   int pressure_min_threshold;
   int pressure_max_threshold;
-  int_matrix map_to_array;
+
+  int_matrix state_to_index;
   vector<hex_button_t> hex;
+	
   int key_state_to_pressure(int state_value) {
     if (state_value < key_on_threshold) {
       return -1;
