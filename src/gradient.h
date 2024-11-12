@@ -2,7 +2,6 @@
 #include "utils.h"
 #include "color.h"
 
-
 enum class generate_gradient {
 	shade_tint,
 	define_stops,
@@ -43,16 +42,19 @@ struct gradient_t {
 		// table[i] = color.as_neoPixel();
 	}
 	// kite options similar to rainbow i think.
-
 	
 	// use the rgb/hsv color type, not the colorCode
+	void generate_gradient(convert to other kinds);
 	void generate_gradient(std::map<float, color_t> gradient_map) {
 		// interpolate gradient colors and convert
 		// to neopixel format ahead of time
 		// overloaded lerp to blend colors perceptually
 		// then you can do
+
+		// convert gradient map into OKLAB
 		for (float i = 0; i < 1; i += 1/(number_of_steps - 1)) {
-			color_code_map[i] = lerp_over_map(gradient_map, i).as_neoPixel;
+			
+			color_code_map[i] = linterp(convert_to_gradient_map, i).as_neoPixel;
 		}
 	}
 	// use the rgb/hsv color type, not the colorCode
