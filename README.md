@@ -191,26 +191,59 @@ enum {
 }
 
 layout_t myLayout = {
-  generate_equal, // rule
-  {12, 100},      // store a vector of params
-  {
-   {overrides...}
+  .method = generate_equal, // rule
+  .
+  .divisions = 12;
+  .equal_step_size = 100.0;
+  OR 
+  .scala = "texttext\n"
+  "texttext\n";
+  .kbm = "texttext\n"
+  "texttext\n";
+   .overrides = {
+   {cell, MIDI note as float}
   }
 }
 enum {
-  generate_shade_from_HSV = 0,
-  generate_shade_from_RGB = 1, ...
+  generate_shade = 0,
   generate_rainbow_from_SL = 101,
   generate_rainbow_from_SV...
   etc
 }
+```
+COLOR LIBRARY would be similarly preconstructed
+```
 gradient_t keyRed = {
-  generate_shade_from_HSV,
-  {180, 255, 255} // make a function or namespace that will convert this to a color type
+  .method = generate_shade,
+  .hsv = {180, 255, 255}
+  OR .rgb = {0,255,255}
+  OR .rgbHex = 0x00FFFF
+  OR .oklch = {0.8, 0.15, 201.0}
 }
 gradient_t rainbow = {
   generate_rainbow_from_SV,
   {1.0, 1.0}
 }
 ```
-questions: can we partially init the object via constant declaration? i.e. struct has 4 member variables but we declare 1 and 2 from outset
+then finally you have a header PRESETS.H where you select which layouts you will load, as an ordered map or something.
+```
+std::map<int, preset_t> preset;
+void import_preset {
+  preset[0] = preset101;
+  preset[99] = preset102;
+  preset[7] = NicksPreset,
+  preset[-1] = yourMomsPreset;
+}
+```
+the settings file will save the preset number.
+
+in the class you have a populate routine that takes the parameters and turns em into the stuff you need.
+
+SETUP()
+take each preset and run the populate routine
+when the routine gets to a gradient def, run the populate at that time.
+on the OLED, show progress & errors (i.e. preset #99 loaded successfully; preset #7 had errors; etc.
+have a splash or waiting state for the pixels
+
+we could have hardware start running in case we want to debug with button sequence.
+need to check whether initializing hardware on core2, not just timers, slows down loop or breaks/ causes mutex issues.  
