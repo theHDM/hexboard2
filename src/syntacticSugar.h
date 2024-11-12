@@ -62,17 +62,16 @@ T lerp(T xOne, T xTwo, float yOne, float yTwo, float y) {
 }
 
 #include <map>
-using lerp_map_t = std::map<float, int>;
-using lerp_inverse_map_t = std::map<int, float>;
-lerp_inverse_map_t invert(lerp_map_t lerp_map) {
-  lerp_inverse_map_t temp;
-  for (auto i : lerp_map) {
+template <typename T1, typename T2>
+std::map<T2,T1> invert(const std::map<T1,T2>& orig_map) {
+  std::map<T2,T1> temp;
+  for (auto i : orig_map) {
     temp[i->second] = i->first;
   }
   return temp;
 }
-template <typename T_key, typename T_value>
-T_value lerp_over_map(const std::map<T_key, T_value>& lerp_map, T_key pos) {
+template <typename T1, typename T2>
+T2 lerp_over_map(const std::map<T1, T2>& lerp_map, T1 pos) {
   auto LB = lerp_map.lower_bound(pos);
   auto UB = std::next(LB);
   return lerp(LB->second, UB->second, LB->first, UB->first, pos);
