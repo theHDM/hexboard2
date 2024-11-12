@@ -2,31 +2,30 @@
 #include "utils.h"
 
 enum class command {
-  none = 0,
-  send_note_on = 1,
-  send_note_off = 2,
-  send_control_change = 3,
-  send_program_change = 4,
-  swap_palette = 5,
-  swap_preset = 6,
-  hardware_dip = 7,
-  count
+  none,
+  send_note_on,
+  send_note_off,
+  send_control_change,
+  send_program_change,
+  swap_palette,
+  swap_preset,
+  hardware_dip
 };
 
-enum class param { // parameter codes
-	null = -1,
+enum { // parameter codes
+	null_param = -1,
 	go_to_prev = 0,
   go_to_next = 1
 }
 
 struct instruction_t {
-  command do = command::none;
-  param param_1 = param::null;
-  param param_2 = param::null;
+  command do_this = command::none;
+  int param_1 = null_param;
+  int param_2 = null_param;
 };
 /* 
 instruction_t do_nothing;
-instruction_t do_note_on = {.do = command::send_note_on};
+instruction_t do_note_on = {.do_this = command::send_note_on};
 instruction_t do_next_preset = {command::swap_preset, param::go_to_next};
 */
 struct instruction_set_t {
@@ -165,10 +164,10 @@ struct keyboard_obj {
 	//    hexBoard.update();
 	//    for (auto& h : hexBoard.hex) {
 	//			instruction_t cmd = h.get_instructions();
-	//			if (cmd.do == command::send_note_on) {
+	//			if (cmd.do_this == command::send_note_on) {
 	//				// tryNoteOn(h);
 	//			}
-	//			if (cmd.do == do_note_off) {
+	//			if (cmd.do_this == do_note_off) {
 	//				// tryNoteOff(h);
 	//			}
 	//      // etc.etc.
