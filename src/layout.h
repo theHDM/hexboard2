@@ -1,66 +1,51 @@
 #pragma once
-#include "syntacticSugar.h"
+#include "utils.h"
 
-enum {
+enum { // instruction codes
   no_instruction = 0,
-  note_on = 1,
-  note_off = 2,
-  control_change = 3,
-  program_change = 4,
-  palette_swap = 5,
-  preset_swap = 6,
+  send_note_on = 1,
+  send_note_off = 2,
+  send_control_change = 3,
+  send_program_change = 4,
+  swap_palette = 5,
+  swap_preset = 6,
   hardware_dip = 7,
   instruction_count
 };
 
-struct hex_t { //      -r
-	int q;       //  -q <- \ -> +q
-	int r;       //         +r
-	hex_t(int q=0, int r=0)
-		: q(q), r(r) {}
-	hex_t& operator=(const hex_t& rhs) {
-		q = rhs.q;
-		r = rhs.r;
-		return *this;
-	}
-	bool operator==(const hex_t& rhs) const {
-		return (q == rhs.q && r == rhs.r);
-	}
-	hex_t operator+(const hex_t& rhs) const {
-		return hex_t(q + rhs.q, r + rhs.r);
-	}
-	hex_t operator*(const int& rhs) const {
-		return hex_t(rhs * q, rhs * r);
-	}
+enum { // parameter codes
+	null_param = -1,
+	go_to_prev = 0,
+  go_to_next = 1
 }
 
-enum {
-	dir_east = 0,
-	dir_ne = 1,
-	dir_nw = 2,
-	dir_west = 3,
-	dir_sw = 4,
-	dir_se = 5
-};
-
-hex_t unitHex[] = {
-	{+1, 0},{+1,-1},{0,-1},{-1, 0},{-1,+1},{0,+1}
-};
-
 struct instruction_t {
-  int instruction_code;
-  int parameter;
+  int instruction_code = no_instruction;
+  int parameter_1 = null_param;
+  int parameter_2 = null_param;
 };
-
+/* 
+instruction_t do_nothing;
+instruction_t do_note_on = {.instruction_code = send_note_on};
+instruction_t do_next_preset = {swap_preset, go_to_next};
+*/
 struct instruction_set_t {
-  instruction_t stays_off;
-  instruction_t turns_off;
-  instruction_t turns_on;
-  instruction_t stays_on_pressure_equal;
-  instruction_t stays_on_pressure_increase;
-  instruction_t stays_on_pressure_decrease;
+  instruction_t on_press;  // default state = no instruction
+  instruction_t on_release;
+  instruction_t on_hold;
+  instruction_t neutral;
 };
-
+/*
+instruction_set_t music_note = {
+	.on_press = do_note_on,
+  .on_hold = do_note_change_pressure,
+  .on_release = do_note_off,
+	.neutral = do_nothing // optional
+};
+instruction_set_t get_next_preset = {
+	.turns_on = do_next_preset
+};
+*/
 struct hex_button_t {
 	hexagon_coord_t coordinates;
 	int pixel;
