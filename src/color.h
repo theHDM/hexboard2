@@ -27,11 +27,15 @@ struct okLAB_color {
 	float a; // -1..1
 	float b; // -1..1
 }
+
+// can you just call em all
+// i.e. to_okLAB( color)
 // conversion functions
 int scaleTo255(float f) {
 	return clip(round(255.0 * f),0,255);
 }
-sRGB_color HSV_to_sRGB (HSV_color from) {
+
+sRGB_color convert_to_sRGB (HSV_color from) {
 	int sextant = (int)std::floor(from.h / 60);
 	float c = from.v * from.s;
 	float x = c * (1 - std::abs(std::fmod(from.h / 60, 2) - 1));
@@ -57,7 +61,7 @@ sRGB_color HSV_to_sRGB (HSV_color from) {
 float gamma(float l) {
 	return (l >= 0.0031308) ? (1.055 * pow(l, 1.0/2.4) - 0.055) : (12.92 * l);
 }
-sRGB_color lRGB_to_sRGB (lRGB_color from) {
+sRGB_color convert_to_sRGB (lRGB_color from) {
 	return {
 		scaleTo255(gamma(from.r)),
 		scaleTo255(gamma(from.g)),
@@ -67,7 +71,7 @@ sRGB_color lRGB_to_sRGB (lRGB_color from) {
 float ungamma(float f) {
 	return ((f > 0.04045) ? std::pow((f + 0.055) / 1.055, 2.4) : (f / 12.92));
 }
-lRGB_color sRGB_to_lRGB (sRGB_color from) {
+lRGB_color convert_to_lRGB (sRGB_color from) {
 	return {
 		ungamma((float)from.r / 255.0),
 		ungamma((float)from.g / 255.0),
@@ -75,7 +79,7 @@ lRGB_color sRGB_to_lRGB (sRGB_color from) {
 	};
 }
 
-okLAB_color lRGB_to_okLAB (lRGB_color from) {
+okLAB_color convert_to_okLAB (lRGB_color from) {
 	float Lg = 0.4121656120 * from.r + 0.5362752080 * from.g + 0.0514575653 * from.b;
 	float Md = 0.2118591070 * from.r + 0.6807189584 * from.g + 0.1074065790 * from.b;
 	float Sh = 0.0883097947 * from.r + 0.2818474174 * from.g + 0.6302613616 * from.b;
@@ -88,7 +92,18 @@ okLAB_color lRGB_to_okLAB (lRGB_color from) {
 		0.0259040371 * Lg + 0.7827717662 * Md - 0.8086757660 * Sh
 	};
 }
-lRGB_color okLAB_to_lRGB (okLAB_color from) {
+okLAB_color convert_to_okLAB (sRGB_color from) {
+	return convert_to_okLAB(
+		convert_to_lRGB(from)
+	);
+}
+okLAB_color convert_to_okLAB (HSV_color from) {
+	return convert_to_okLAB(
+		convert_to_sRGB(from)
+	);
+}
+
+lRGB_color convert_to_lRGB (okLAB_color from) {
 	float Lg = from.l + 0.3963377774 * from.a + 0.2158037573 * from.b;
 	float Md = from.l - 0.1055613458 * from.a - 0.0638541728 * from.b;
 	float Sh = from.l - 0.0894841775 * from.a - 1.291485548  * from.b;
@@ -101,71 +116,25 @@ lRGB_color okLAB_to_lRGB (okLAB_color from) {
 	return { clip(r,0.0,1.0), clip(g,0.0,1.0), clip(b,0.0,1.0) };
 }
 
-// convert to okLCH
-okLCH_color okLAB_to_okLCH (okLAB_color from) {
-	polar ch = cartesian_to_polar({from.a,from.b});
-	return {l, ch.r, ch.d};
-}
-okLCH_color lRGB_to_okLCH (lRGB_color from) {
-	return okLAB_to_okLCH(
-		lRGB_to_okLAB(from)
-	);
-}
-okLCH_color sRGB_to_okLCH (sRGB_color from) {
-	return lRGB_to_okLCH(
-		sRGB_to_lRGB(from)
-	);
-}
-okLCH_color HSV_to_okLCH (HSV_color from) {
-	return sRGB_to_okLCH(
-		HSV_to_sRGB(from)
-	);
-}
-
-// to pixel_code
-pixel_code lRGB_to_neoPixel (lRGB_color from) {
+pixel_code convert_to_neoPixel (lRGB_color from) {
 	int r = (scaleTo255(from.r) & 0xFF); // just to be sure
 	int g = (scaleTo255(from.g) & 0xFF); // just to be sure
 	int b = (scaleTo255(from.b) & 0xFF); // just to be sure
 	return ((r << 16) | ((g << 8) | b));   // return 24-bit "un-gamma'd" RGB
 }
-pixel_code sRGB_to_neoPixel (sRGB_color from) {
-	return lRGB_to_neoPixel(sRGB_to_lRGB(from));
-}
-pixel_code HSV_to_neoPixel (HSV_color from) {
-	return sRGB_to_neoPixel(HSV_to_sRGB(from));
-}
-pixel_code okLAB_to_neoPixel (okLAB_color from) {
-	return lRGB_to_neoPixel(okLAB_to_lRGB(from));
-}
-okLAB_color okLCH_to_okLAB (okLCH_color from) {
-	cartesian ab = polar_to_cartesian({from.c,from.h});
-	return {l, ab.x, ab.y};
-}
-pixel_color okLCH_to_neoPixel (okLCH_color from) {
-	return okLAB_to_neoPixel(okLCH_to_okLAB(from));
+pixel_code convert_to_neoPixel (okLAB_color from) {
+	return convert_to_neoPixel(convert_to_lRGB(from));
 }
 
 // overload linterp function so that you can
-// blend LCH colors together. has to be
-// done on LCH space because RGB/HSV are not
-// good at perceptual blending.
+// interpolate two LAB colors and return the
+// pixel code.
 
-okLAB_color linterp(LAB_color colorOne, LAB_color colorTwo,
+pixel_code linterp(LAB_color colorOne, LAB_color colorTwo,
 									float yOne, float yTwo, float y) {
-	return {
+	return convert_to_neoPixel({
 		linterp(colorOne.l, colorTwo.l, yOne, yTwo, y),
 		linterp(colorOne.a, colorTwo.a, yOne, yTwo, y),
 		linterp(colorOne.b, colorTwo.b, yOne, yTwo, y)
-	};
-}
-okLCH_color linterp(LCH_color colorOne, LCH_color colorTwo,
-									float yOne, float yTwo, float y) {
-	return okLAB_to_okLCH(
-		linterp(
-			okLCH_to_okLAB(colorOne),
-			okLCH_to_okLAB(colorOne),
-			yOne, yTwo, y
-		)
-	);
+	});
 }
