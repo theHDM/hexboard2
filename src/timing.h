@@ -1,7 +1,6 @@
 #pragma once
+#include "utils.h"
 #include "hardware/timer.h"
-
-using timeStamp = unsigned long long int;
 
 timeStamp getTheCurrentTime() {
   timeStamp temp = timer_hw->timerawh;
