@@ -26,7 +26,7 @@ inline T positiveMod(T n, int d) {
 }
 // extensions of linear interpolation used in this project
 template <typename T>
-inline T lerp(T xOne, T xTwo, float yOne, float yTwo, float y) {
+inline T linterp(T xOne, T xTwo, float yOne, float yTwo, float y) {
   if (yOne == yTwo) {
     return xOne;
   } else if (y <= yOne) {
@@ -95,7 +95,7 @@ inline template <typename T1, typename T2>
 T2 lerp_over_map(const std::map<T1, T2>& lerp_map, T1 pos) {
   auto LB = lerp_map.lower_bound(pos);
   auto UB = std::next(LB);
-  return lerp(LB->second, UB->second, LB->first, UB->first, pos);
+  return linterp(LB->second, UB->second, LB->first, UB->first, pos);
 }
 
 // a hexboard obviously needs to have a class of hexagon coordinates.
@@ -153,3 +153,27 @@ hex_t unitHex[] = {
   { 1, 0},{ 1,-1},{ 0,-1},{-1, 0},{-1, 1},{ 0, 1}
 };
 // thus, hex += 2 * unitHex[dir_west] means shift hex 2 spaces to the left
+#include <cmath>
+// trigonometric functions we need
+const float radians = 0.01745329251;  // pi over 180
+struct polar {
+	float r; 
+	float d; // angle in degrees
+}
+struct cartesian {
+	float x;
+	float y;
+}
+inline cartesian polar_to_cartesian (const polar input) {
+	float a = input.d * radians;
+	return {input.r * cos(a), input.r * sin(a)};
+}
+// other helpful utilities
+inline template <typename T>
+T min_of_3(T a, T b, T c) {
+	return std::min(std::min(a,b),c);
+}
+inline template <typename T>
+T max_of_3(T a, T b, T c) {
+	return std::max(std::max(a,b),c);
+}
