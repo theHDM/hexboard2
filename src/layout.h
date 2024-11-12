@@ -1,8 +1,8 @@
 #pragma once
 #include "utils.h"
 
-enum { // instruction codes
-  no_instruction = 0,
+enum class command {
+  none = 0,
   send_note_on = 1,
   send_note_off = 2,
   send_control_change = 3,
@@ -10,118 +10,144 @@ enum { // instruction codes
   swap_palette = 5,
   swap_preset = 6,
   hardware_dip = 7,
-  instruction_count
+  count
 };
 
-enum { // parameter codes
-	null_param = -1,
+enum class param { // parameter codes
+	null = -1,
 	go_to_prev = 0,
   go_to_next = 1
 }
 
 struct instruction_t {
-  int instruction_code = no_instruction;
-  int parameter_1 = null_param;
-  int parameter_2 = null_param;
+  command do = command::none;
+  param param_1 = param::null;
+  param param_2 = param::null;
 };
 /* 
 instruction_t do_nothing;
-instruction_t do_note_on = {.instruction_code = send_note_on};
-instruction_t do_next_preset = {swap_preset, go_to_next};
+instruction_t do_note_on = {.do = command::send_note_on};
+instruction_t do_next_preset = {command::swap_preset, param::go_to_next};
 */
 struct instruction_set_t {
-  instruction_t on_press;  // default state = no instruction
+  instruction_t on_press;  // default state = do nothing
   instruction_t on_release;
   instruction_t on_hold;
-  instruction_t neutral;
+  instruction_t when_off;
 };
 /*
 instruction_set_t music_note = {
 	.on_press = do_note_on,
   .on_hold = do_note_change_pressure,
-  .on_release = do_note_off,
-	.neutral = do_nothing // optional
+  .on_release = {command::send_note_off},
+	.when_off = do_nothing // optional
 };
 instruction_set_t get_next_preset = {
-	.turns_on = do_next_preset
+	.on_press = do_next_preset
 };
 */
-struct hex_button_t {
-	hexagon_coord_t coordinates;
-	int pixel;
-	
-	int current_pressure;  
-	//     -1 means off
-	// 0..127 means on and send key pressure
-	int prior_pressure;
-	instruction_set_t on_key;
-
-  void update(int p) {
-    prior_pressure = current_pressure;
-    current_pressure = p;
+struct button {
+	// how to locate this button
+	hex_t coordinates;
+	int pixel_num;
+	// history of the digital/analog read values
+	std::map<time_uS,int> state;
+  void update(int value, time_uS read_time) {
+		state[read_time] = value;
+		// state.clear() some range;
   }
+	// the type of button expresses what
+	// the button executes when it's acted on
+	// e.g. this->type = music_note;
+	// this should be set via the layout definition
+	instruction_set_t type;
   instruction_t get_instructions() {
-    if (current_pressure > prior_pressure) {
-      if (prior_pressure == -1) {
-        return on_key.turns_on;
-      } else {
-        return on_key.stays_on_pressure_increase;
-      }
-    } else if (current_pressure < prior_pressure) {
-      if (current_pressure == -1) {
-        return on_key.turns_off;
-      } else {
-        return on_key.stays_on_pressure_decrease;
-      }
-    } else if (current_pressure == -1) {
-      return on_key.stays_off;
-    } else {
-      return on_key.stays_on_pressure_equal;
-    }
-  }
+    // decide when to call:
+		return type.on_press;
+    // decide when to call:
+		return type.on_hold;
+    // decide when to call:
+		return type.on_release;
+    // decide when to call:
+		return type.when_off;
+	}
+	// stored information related to this key
+	// such as musical note, channel number,
+	// key color rule, animation layer,
+	// should be set via the layout definition
+	// TO BE LINKED!
+	//
 };
-
+// interface to set up hex button array,
+// pass digital/analog state,
+// and return/map/find by pixel/coordinates
 struct keyboard_obj {
+  vector<button> hex;
+	button empty_hex; // unused hex when search fails
   int sizeA,
   int sizeB,
-  int_matrix state_matrix;
-  int key_on_threshold;
-  int pressure_min_threshold;
-  int pressure_max_threshold;
+  int_matrix state_to_index; // one-to-one map, 2d coord to 1d coord
+	std::map<int,int> pixel_to_index; // some-to-one map
+	std::map<int,int> index_to_pixel; // on setup, flip to invert
+	std::map<int,hex_t> index_to_coord; // map is not reversible
 
-  int_matrix state_to_index;
-  vector<hex_button_t> hex;
-	
-  int key_state_to_pressure(int state_value) {
-    if (state_value < key_on_threshold) {
-      return -1;
-    }
-    if (state_value < pressure_min_threshold) {
-      return 0;
-    }
-    if (state_value > pressure_max_threshold) {
-      return 127;
-    }
-    return lerp(0,127,pressure_min_threshold,pressure_max_threshold,state_value);
-  }
-  void setup(int cols, int rows) {
+  void setup(int cols, int rows, 
+						std::map<int,int> given_map_pixel_to_index,
+						std::map<int,hex_t> given_map_index_to_coord) {
     sizeA = cols;
     sizeB = rows;
     resize_matrix(state_matrix, cols, rows);
     hex.resize(cols * rows);
+		index_to_coord = given_map_index_to_coord;
+		pixel_to_index = given_map_pixel_to_index;
+		index_to_pixel = invert(pixel_to_index);
+		for (int i = 0; i < hex.size(), ++i) {
+			auto search = index_to_pixel.find(i);
+			if (search == index_to_pixel.end()) {
+				hex[i].pixel_num = -1;   // which means not-a-pixel
+			} else {
+				hex[i].pixel_num = search->second;
+			}
+			hex[i].coordinates = index_to_coord[i];
+		}
   }
+
+	// you can normally refer to a single button
+	// by hex[i] where i is the given index.
+	// but you should also be able to locate
+	// the hex using a lookup from the map.
+	// it will return hex.end() if not found --
+	// check for this condition before doing anything
+	// in the main sequence
+	
+	button& hex_at_pixel(int at_pixel_number) {
+		auto search = pixel_to_index.find(at_pixel_number);
+		if (search == pixel_to_index.end()) {
+			return empty_hex;
+		}
+		return hex[search->second];
+	}
+	button& hex_at_coord(hex_t at_coord) {
+		for (auto& i : hex) {
+			if (i.coordinates == at_coord) {
+				return i;
+			}
+		}
+		return empty_hex;
+	}
+	// e.g.
+  //	hex_at_coord({-3, 5}).animate = 1;
   void panic() {
     for (auto c : state_matrix) {
       fill(c.begin(),c.end(),-1);
     }
   }
-  void update(int_matrix read_new_state) {
-    state_matrix = read_new_state;
+  void update(int_matrix read_new_state, int_matrix read_time) {
     for (int i = 0; i < sizeA; ++i) {
       for (int j = 0; j < sizeB; ++j) {
 				hex[map_to_array[i][j]].update(
-          key_state_to_pressure(state_matrix[i][j])
-        );
+          read_new_state[i][j], read_time[i][j]
+				);
       }
     }
   }
