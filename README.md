@@ -127,7 +127,10 @@ class musicalLayout {
   std::vector<noteToHexagonPair> list of manual overrides
 }
 ```
-DONE MOSTLY
+OUTSTANDING (with Jared) -- how do we calibrate for velocity and manage pressure?
+prioritize calculating key velocity based on pressure delta over length of key press. do this by storing the exact nanosecond time of the read in the IRQ loop, and perhaps save more than one entry of historical pressure.
+
+idea...at 1/2 pressure, noteOn and determine velocity based on last X samples. then pressure is sent to MIDI until noteOff at -1 pressure, send release velocity based on last X samples.
 ```
 class keyboard_obj {
   make a key sensitivity map / function
