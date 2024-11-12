@@ -9,22 +9,16 @@
 
 #pragma once
 
-enum { // button states, this might soon be deprecated
-  btn_off     = 0b00,
-  btn_press   = 0b01,
-  btn_release = 0b10,
-  btn_hold    = 0b11
-};
 // the NeoPixel takes an unsigned 32-bit integer as the pixel color code
 // use an alias to make it easier to identify.
 // not using std library "uint32_t" because <Arduino.h> 
 // also uses it, and there is a risk of conflict.
-using colorCode = unsigned long int;
+using pixel_code = unsigned long int;
 // time codes are unsigned 64-bit integers.
 // use an alias to make it easier to identify.
 // not using std library "uint64_t" because <Arduino.h> 
 // also uses it, and there is a risk of conflict.
-using timeStamp = unsigned long long int;
+using time_uS = unsigned long long int;
 // function that guarantees the mod value is always positive
 template <typename T>
 inline T positiveMod(T n, int d) {
@@ -88,11 +82,11 @@ inline T pop_front(std::deque<T>& q) {
 #include <map>
 inline template <typename T1, typename T2>
 std::map<T2,T1> invert(const std::map<T1,T2>& orig_map) {
-  std::map<T2,T1> temp;
+  std::map<T2,T1> flip;
   for (auto i : orig_map) {
-    temp[i->second] = i->first;
+    flip[i->second] = i->first;
   }
-  return temp;
+  return flip;
 }
 // if you have a map of keys to values, use this utility
 // to LERP the value that would be in between two keys.
@@ -143,6 +137,8 @@ struct hex_t {
   }
 }
 
+// keep this as a non-class enum because
+// we need to be able to cycle directions
 enum {
 	dir_e = 0,
 	dir_ne = 1,
