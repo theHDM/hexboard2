@@ -177,3 +177,7 @@ inline template <typename T>
 T max_of_3(T a, T b, T c) {
 	return std::max(std::max(a,b),c);
 }
+inline template <typename T>
+T clip(T value, T floor, T ceiling) {
+	return std::max(floor,std::min(value,ceiling));
+}
