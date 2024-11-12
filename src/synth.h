@@ -34,7 +34,7 @@ struct instrument_t {
   int  sustain = 255;  // level [0..255]
   int  release = 0;    // in samples
   void set_attack(int ms) {
-    attack = ms * sampleRate / 1000;
+    attack = ms * sampleRate / 1000; // where is sampleRate defined?
   }
   void set_decay(int ms) {
     decay = ms * sampleRate / 1000;
@@ -81,8 +81,8 @@ private:
   int _velocity = 0;     // must be [0..127]
   bool _applyEQ = true;
   int _eq = 8;
-  int _incr = 0;  // inverse of frequency
-  int _ctr = 0;   // waveform lookup counter
+  float _incr = 0;  // inverse of frequency
+  float _ctr = 0;   // waveform lookup counter
   int _smp = 0;   // samples since onset
   void hybridParameters(int &refToShape, int &refToMod) {
     // at low frequencies play a square wave
@@ -123,31 +123,31 @@ private:
     switch (shape) { // generator functions to make wave tables
     case generator_square: // the mod wheel changes the duty cycle
       for (int i = 0; i < (128 + mod); i++) {
-        _stored_wave_form[i] = 0;
+        _stored_wave_form[i] = -127;
       }
       for (int i = (128 + mod); i < 256; i++) {
-        _stored_wave_form[i] = 255;
+        _stored_wave_form[i] = 127;
       }
       break;    
     case generator_saw: // the mod wheel changes the slope of the saw
 	    // i.e. more mod makes the saw "squared off"
       for (int i = 0; i < mod; i++) {
-        _stored_wave_form[i] = 0;
+        _stored_wave_form[i] = -127;
       }
       for (int i = mod; i < (128 + mod); i++) {
-        _stored_wave_form[i] = linterp(0,255,mod,128+mod,i);
+        _stored_wave_form[i] = linterp(-127,127,mod,128+mod,i);
       }
       for (int i = (128 + mod); i < 256; i++) {
-        _stored_wave_form[i] = 255;
+        _stored_wave_form[i] = 127;
       }
       break;    
     case generator_triangle: // the mod wheel moves the apex of the wave
 	    // i.e. more mod makes the triangle more "sawtooth-like"
       for (int i = 0; i < (128 + mod); i++) {
-        _stored_wave_form[i] = linterp(0,255,0,128+mod,i);
+        _stored_wave_form[i] = linterp(-127,127,0,128+mod,i);
       }
       for (int i = (128 + mod); i < 256; i++) {
-        _stored_wave_form[i] = linterp(0,255,256,128+mod,i);
+        _stored_wave_form[i] = linterp(-127,127,256,128+mod,i);
       }
       break;
     default: // otherwise grab the existing wavetable
@@ -189,7 +189,7 @@ public:
     _noteOn = true;
     _playing = true;
     _smp = 0;
-    _ctr = 0;
+    _ctr = 0.0;
   }
   void noteOff() {
     _noteOn = false;
@@ -205,7 +205,7 @@ public:
      // lookup. it might be better to simply
      // use floats all around instead of force
      // to 16-bit integer, but for now keep it this way
-      _incr = round(f * sampleIncr);
+      _incr = f * sampleIncr;
       if (_instrument.type == generator_hybrid) {
         regenerateWaveForm();
       }
@@ -240,9 +240,9 @@ public:
     if (!(_playing)) {
       return 0;
     }
-    _ctr += _incr;
+    _ctr = std::fmod(_ctr + _incr, 256);
     _smp++;
-    int wave_raw = _stored_wave_form[(_ctr & 0xFF00) >> 8];
+    int wave_raw = _stored_wave_form[int(_ctr)];
     int envelope = 0;
     if (_noteOn) {
       // apply attack decay sustain
@@ -290,7 +290,7 @@ public:
     // push the floating math back to the synth.
     // because it's getting rounded anyway?
     // think it over.
-    _sample_increment = 65536.0 / _sample_rate;
+    _sample_increment = 256.0 / _sample_rate;
     // initialize the list of open polyphony channels
     for (int i = 0; i < polyphony_limit; i++) {
       _channelQueue.push(i + 1);
