@@ -8,14 +8,14 @@ struct HSV_color {
 	float v; // 0..1
 }
 struct sRGB_color {
-	int r;
-	int g;
-	int b;
+	int r; // 0..255
+	int g; // 0..255
+	int b; // 0..255
 }
 struct lRGB_color {
-	float r; // 0..255
-	float g; // 0..255
-	float b; // 0..255
+	float r; // 0..1
+	float g; // 0..1
+	float b; // 0..1
 }
 struct okLCH_color {
 	float l; // 0..1
