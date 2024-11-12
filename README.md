@@ -20,22 +20,27 @@ DONE AUDIO.h
 create one object per audio source, with multiple pin outs
 use circle buffer and mutex pointers when needed
 
-DONE but has to be on core 1 PIXEL.h
+DONE but has to be on core 1
+PIXEL.h
 poll() to send pixel data each frame (60fps, or 16384uS per frame)
 do all color coversions before polling -- should only send the buffer.
 
 consider running the OLED / menu on core 1 because it's blocky.
+
+DONE
 ```
 struct hex_coordinate {int q, int r, int s};
 make an ordered map of pixel ID to coordinate and back
 can look up "coordinates of pixel" or "pixel at this coordinate"
 ```
+DONE
 ```
 struct instruction {
   enum {note on, note off, control change, program change, palette swap, preset swap, etc.}
   int some sort of parameter
 }
 ```
+STARTED
 ```
 class oneSingleHex {
   friend keyboard_obj (allow inheritance)
@@ -50,6 +55,7 @@ class oneSingleHex {
       key_turns_off                       1+ >  0
 }
 ```
+
 ```
 struct noteValue {
   float MIDInoteValueWithMicrotones [0.0 .. 128.0>
@@ -59,9 +65,11 @@ struct noteValue {
   float associatedFrequencyForSynth {2^MIDI-69 * 440}
 }
 ```
+
 ```  
 struct noteToHexagonPairOrMap {noteValue N, hex_coordinate H}
 ```
+
 ```
 class generator {
   textStream KBMdata -- this will give the info needed to:
@@ -114,6 +122,7 @@ class musicalLayout {
   std::vector<noteToHexagonPair> list of manual overrides
 }
 ```
+DONE MOSTLY
 ```
 class keyboard_obj {
   make a key sensitivity map / function
@@ -126,6 +135,7 @@ class keyboard_obj {
   std::vector<oneSingleHex> of 160 hexagon states
 }
 ```
+IN PROGRESS
 ```
 class gradient {
   this will be a method to store or generate gradients.
@@ -135,6 +145,7 @@ class gradient {
   rainbow(constant SV, constant SL, etc.)
 }
 ```
+IN PROGRESS
 ```
 class reactiveColoring {
   instructions to lookup along a gradient based on parameter
@@ -144,6 +155,7 @@ class reactiveColoring {
   passiveCycle(speed)
 }
 ```
+IN PROGRESS
 ```
 struct pixelDefinition {
   gradient,
