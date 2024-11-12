@@ -155,7 +155,6 @@ hex_t unitHex[] = {
 // thus, hex += 2 * unitHex[dir_west] means shift hex 2 spaces to the left
 #include <cmath>
 // trigonometric functions we need
-const float radians = 0.01745329251;  // pi over 180
 struct polar {
 	float r; 
 	float d; // angle in degrees
@@ -165,8 +164,13 @@ struct cartesian {
 	float y;
 }
 inline cartesian polar_to_cartesian (const polar input) {
-	float a = input.d * radians;
+	float a = input.d *  0.01745329251;
 	return {input.r * cos(a), input.r * sin(a)};
+}
+inline polar cartesian_to_polar (const cartesian input) {
+	float c = sqrtf(input.x * input.x + input.y * input.y);
+	float h = 180.0f + atan2f(-(input.y / c), -(input.x / c)) * 57.2957795131;
+	return {c, h};
 }
 // other helpful utilities
 inline template <typename T>
