@@ -1,4 +1,4 @@
-Notes from my phone as of Nov 7 2024
+Notes as of Nov 12. 2024
 
 DONE:
 designate core 2 as the background operation core
