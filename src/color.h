@@ -146,24 +146,26 @@ pixel_color okLCH_to_neoPixel (okLCH_color from) {
 	return okLAB_to_neoPixel(okLCH_to_okLAB(from));
 }
 
-
-
-
 // overload linterp function so that you can
 // blend LCH colors together. has to be
 // done on LCH space because RGB/HSV are not
 // good at perceptual blending.
-// 
-LCH_color linterp(LCH_color colorOne, LCH_color colorTwo,
+
+okLAB_color linterp(LAB_color colorOne, LAB_color colorTwo,
 									float yOne, float yTwo, float y) {
-	
-	
-	float l = linterp(colorOne.l, colorTwo.l, yOne, yTwo, y);	
-	float c = linterp(colorOne.c, colorTwo.c, yOne, yTwo, y);
-	
-	
-		linterp(colorOne.h, colorTwo.h, yOne, yTwo, y),
-	}
-
-
+	return {
+		linterp(colorOne.l, colorTwo.l, yOne, yTwo, y),
+		linterp(colorOne.a, colorTwo.a, yOne, yTwo, y),
+		linterp(colorOne.b, colorTwo.b, yOne, yTwo, y)
+	};
+}
+okLCH_color linterp(LCH_color colorOne, LCH_color colorTwo,
+									float yOne, float yTwo, float y) {
+	return okLAB_to_okLCH(
+		linterp(
+			okLCH_to_okLAB(colorOne),
+			okLCH_to_okLAB(colorOne),
+			yOne, yTwo, y
+		)
+	);
 }
