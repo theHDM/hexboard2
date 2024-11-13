@@ -1,6 +1,5 @@
-#pragma once
-#include <vector>
-#include "syntacticSugar.h"
+#pragma once
+#include "utils.h"
 #include "config.h"             // contains pin and timing definitions
 #include "timing.h"
 
@@ -117,8 +116,4 @@ void setupTaskMgr() {
     task_mgr.add_task(rotary_pin_fire_period_in_uS,     std::bind(&rotary_obj::poll, &rotary));
     task_mgr.add_task(keyboard_pin_reset_period_in_uS,  std::bind(&pinGrid_obj::poll, &pinGrid));
     task_mgr.begin();
-}
-
-// two task objects
-// take alarm num as a variable
-// see if it works, eh
+}
