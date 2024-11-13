@@ -28,8 +28,6 @@ struct okLAB_color {
 	float b; // -1..1
 }
 
-// can you just call em all
-// i.e. to_okLAB( color)
 // conversion functions
 int scaleTo255(float f) {
 	return clip(round(255.0 * f),0,255);
@@ -142,3 +140,7 @@ okLAB_color linterp(okLAB_color colorOne, okLAB_color colorTwo,
 		linterp(colorOne.b, colorTwo.b, yOne, yTwo, y)
 	};
 }
+
+// for Kite colors and rainbow
+// need to also bring over the maximum chroma / saturation
+// from kitecolors.cpp
