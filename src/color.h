@@ -134,11 +134,11 @@ pixel_code convert_to_neoPixel (okLAB_color from) {
 // interpolate two LAB colors and return the
 // pixel code.
 
-pixel_code linterp(okLAB_color colorOne, okLAB_color colorTwo,
+okLAB_color linterp(okLAB_color colorOne, okLAB_color colorTwo,
 									float yOne, float yTwo, float y) {
-	return convert_to_neoPixel({
+	return {
 		linterp(colorOne.l, colorTwo.l, yOne, yTwo, y),
 		linterp(colorOne.a, colorTwo.a, yOne, yTwo, y),
 		linterp(colorOne.b, colorTwo.b, yOne, yTwo, y)
-	});
+	};
 }
