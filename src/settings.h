@@ -1,11 +1,20 @@
 #pragma once
 #include "utils.h"
+
+struct settings_t {
+  int settingValueA;
+
+  void pack();
+  void unpack();
+};
+
+
 int transposeSteps = 0;
 int scaleLock = 0;
-int perceptual = 1;
+int perceptual = 1; // to deprecate
 int paletteBeginsAtKeyCenter = 1;
-int animationFPS = 32;             // actually frames per 2^20 microseconds. close enough to 30fps
-int wheelMode = 0;                 // standard vs. fine tune mode
+int animationFPS = 32; // actually frames per 2^20 microseconds. close enough to 30fps; to deprecate
+int wheelMode = 0; // standard vs. fine tune mode
 int modSticky = 0;
 int pbSticky = 0;
 int velSticky = 1;
