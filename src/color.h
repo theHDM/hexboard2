@@ -78,6 +78,10 @@ lRGB_color convert_to_lRGB (sRGB_color from) {
 		ungamma((float)from.b / 255.0)
 	};
 }
+okLAB_color convert_to_okLAB (okLCH_color from) {
+	cartesian ab = polar_to_cartesian(from.c, from.h);
+	return {from.l, ab.x, ab.y};
+}
 
 okLAB_color convert_to_okLAB (lRGB_color from) {
 	float Lg = 0.4121656120 * from.r + 0.5362752080 * from.g + 0.0514575653 * from.b;
@@ -130,7 +134,7 @@ pixel_code convert_to_neoPixel (okLAB_color from) {
 // interpolate two LAB colors and return the
 // pixel code.
 
-pixel_code linterp(LAB_color colorOne, LAB_color colorTwo,
+pixel_code linterp(okLAB_color colorOne, okLAB_color colorTwo,
 									float yOne, float yTwo, float y) {
 	return convert_to_neoPixel({
 		linterp(colorOne.l, colorTwo.l, yOne, yTwo, y),
